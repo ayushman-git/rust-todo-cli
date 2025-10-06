@@ -7,13 +7,6 @@
     "priority": "P1"
   },
   {
-    "id": "2",
-    "text": "plan tomorrow",
-    "created_at": "06-10-2025",
-    "updated_at": "06-10-2025",
-    "priority": "P0"
-  },
-  {
     "id": "3",
     "text": "get a haircut",
     "created_at": "06-10-2025",
@@ -23,8 +16,15 @@
   {
     "id": "4",
     "text": "read 10 pages",
-    "created_at": "2025-10-06 16:48:01.108171 +05:30",
-    "updated_at": "2025-10-06 16:48:01.108724 +05:30",
+    "created_at": "2025-10-06 17:09:53.291025 +05:30",
+    "updated_at": "2025-10-06 17:09:53.292736 +05:30",
+    "priority": "P2"
+  },
+  {
+    "id": "5",
+    "text": "read 10 pages next day",
+    "created_at": "2025-10-06 17:14:19.235263 +05:30",
+    "updated_at": "2025-10-06 17:14:19.235573 +05:30",
     "priority": "P2"
   }
 ]

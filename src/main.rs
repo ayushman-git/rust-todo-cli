@@ -1,6 +1,7 @@
-use cli_table::Style;
 use cli_table::{Cell, Table, format::Justify, };
 use serde::{Deserialize, Serialize};
+use cli_table::Style;
+use core::task;
 use std::fmt;
 use std::fs;
 use std::io::{self, Write};
@@ -35,7 +36,7 @@ struct Task {
 fn add_task(args: &Vec<String>) {
     let mut tasks = get_tasks();
 
-    let next_id = tasks.len() + 1;
+    let next_id = tasks.last().unwrap().id.trim().parse::<i32>().unwrap() + 1;
 
     let task = Task {
         id: next_id.to_string(),
@@ -95,6 +96,17 @@ fn get_tasks() -> Vec<Task> {
     tasks
 }
 
+fn delete_task(task_id: &str) {
+    let mut tasks = get_tasks();
+    if let Some(index) = tasks.iter().position(|task| task.id == task_id) {
+        tasks.remove(index);
+        let updated_json = serde_json::to_string_pretty(&tasks).expect("Cannot parse");
+        fs::write("src/db/data.json", updated_json). expect("Cannot write")
+    } else {
+        println!("Task with ID {} not found", task_id);
+    }
+}
+
 fn main() {
     // read_from_print();
     let args: Vec<String> = std::env::args().collect();
@@ -109,5 +121,8 @@ fn main() {
     }
     if args[2] == "list" {
         show_task_list();
+    }
+    if args[2] == "remove" {
+        delete_task(&args[3]);
     }
 }
