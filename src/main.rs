@@ -1,9 +1,10 @@
 use cli_table::Style;
-use cli_table::{Cell, Table, format::Justify};
+use cli_table::{Cell, Table, format::Justify, };
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use std::fs;
 use std::io::{self, Write};
-use std::fmt;
+use chrono::prelude::*;
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
 enum TaskPriority {
@@ -15,7 +16,7 @@ enum TaskPriority {
 impl fmt::Display for TaskPriority {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            TaskPriority::P0 {} => write!(f, "P0"),
+            TaskPriority::P0 => write!(f, "P0"),
             TaskPriority::P1 => write!(f, "P1"),
             TaskPriority::P2 => write!(f, "P2"),
         }
@@ -31,22 +32,6 @@ struct Task {
     priority: TaskPriority,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-struct TaskData {
-    tasks: Vec<Task>,
-}
-
-fn read_from_print() {
-    println!("Enter your task");
-    io::stdout().flush().unwrap();
-
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Failed!");
-
-    let input = input.trim();
-    println!("You entered: {}", input)
-}
-
 fn add_task(args: &Vec<String>) {
     let mut tasks = get_tasks();
 
@@ -55,9 +40,15 @@ fn add_task(args: &Vec<String>) {
     let task = Task {
         id: next_id.to_string(),
         text: args[3].to_string(),
-        created_at: "06-10-2025".to_string(),
-        updated_at: "06-10-2025".to_string(),
-        priority: TaskPriority::P1,
+        created_at: Local::now().to_string(),
+        updated_at: Local::now().to_string(),
+        priority: if args[4].to_lowercase() == "p0" {
+            TaskPriority::P0
+        } else if args[4].to_lowercase() == "p2" {
+            TaskPriority::P2
+        } else {
+            TaskPriority::P1
+        },
     };
 
     tasks.push(task);
@@ -78,20 +69,20 @@ fn show_task_list() {
                 task.text.as_str().cell().justify(Justify::Right),
                 task.priority.cell(),
                 task.created_at.as_str().cell(),
-                task.updated_at.as_str().cell()
+                task.updated_at.as_str().cell(),
             ]
         })
         .collect();
     let table = task_body
-    .table()
-    .title(vec![
-        "ID".cell().bold(true),
-        "Tasks".cell().bold(true),
-        "Priority".cell().bold(true),
-        "Created At`".cell().bold(true),
-        "Updated At`".cell().bold(true),
-    ])
-    .bold(true);
+        .table()
+        .title(vec![
+            "ID".cell().bold(true),
+            "Tasks".cell().bold(true),
+            "Priority".cell().bold(true),
+            "Created At`".cell().bold(true),
+            "Updated At`".cell().bold(true),
+        ])
+        .bold(true);
 
     let table_display = table.display().unwrap();
     println!("{}", table_display);
@@ -99,9 +90,9 @@ fn show_task_list() {
 
 fn get_tasks() -> Vec<Task> {
     let json_content = fs::read_to_string("src/db/data.json").expect("Cannot read the JSON file");
-    let formatted_content: TaskData =
+    let tasks: Vec<Task> =
         serde_json::from_str(&json_content).expect("Cannot parse file data");
-    formatted_content.tasks
+    tasks
 }
 
 fn main() {
